@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Robbie's Prompt Library</title>
+<style>
+/* ─── DESIGN TOKENS ────────────────────────────────────────────────── */
+:root {
+  --color-bg-primary: #FFFFFF;
+  --color-bg-secondary: #F2F2F7;
+  --color-bg-tertiary: #FFFFFF;
+  --color-bg-grouped: #F2F2F7;
+  --color-bg-grouped-secondary: #FFFFFF;
+  --color-label-primary: #000000;
+  --color-label-secondary: rgba(60,60,67,0.6);
+  --color-label-tertiary: rgba(60,60,67,0.3);
+  --color-label-quaternary: rgba(60,60,67,0.18);
+  --color-blue: #007AFF;
+  --color-green: #34C759;
+  --color-red: #FF3B30;
+  --color-orange: #FF9500;
+  --color-yellow: #FFCC00;
+  --color-purple: #AF52DE;
+  --color-gray: #8E8E93;
+  --color-gray2: #AEAEB2;
+  --color-gray3: #C7C7CC;
+  --color-gray4: #D1D1D6;
+  --color-gray5: #E5E5EA;
+  --color-gray6: #F2F2F7;
+  --color-separator: rgba(60,60,67,0.29);
+  --color-separator-opaque: #C6C6C8;
+  --color-nav-bg: rgba(242,242,247,0.72);
+  --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+  --font-rounded: "SF Pro Rounded", -apple-system, sans-serif;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
+  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px;
+  --radius-xl: 20px; --radius-pill: 980px;
+  --shadow-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
+  --shadow-2: 0 4px 12px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.08);
+  --shadow-3: 0 8px 24px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.08);
+  --spring-appear: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-dismiss: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --duration-fast: 150ms;
+  --duration-standard: 300ms;
+  --duration-slow: 500ms;
+  /* accent – orange from original brand */
+  --color-accent: #FF6B35;
+  --color-accent-tint: rgba(255,107,53,0.12);
+}
+[data-theme="dark"] {
+  --color-bg-primary: #000000;
+  --color-bg-secondary: #1C1C1E;
+  --color-bg-tertiary: #2C2C2E;
+  --color-bg-grouped: #000000;
+  --color-bg-grouped-secondary: #1C1C1E;
+  --color-label-primary: #FFFFFF;
+  --color-label-secondary: rgba(235,235,245,0.6);
+  --color-label-tertiary: rgba(235,235,245,0.3);
+  --color-label-quaternary: rgba(235,235,245,0.18);
+  --color-gray: #8E8E93;
+  --color-gray2: #636366;
+  --color-gray3: #48484A;
+  --color-gray4: #3A3A3C;
+  --color-gray5: #2C2C2E;
+  --color-gray6: #1C1C1E;
+  --color-separator: rgba(84,84,88,0.65);
+  --color-separator-opaque: #38383A;
+  --color-nav-bg: rgba(28,28,30,0.72);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg-primary: #000000;
+    --color-bg-secondary: #1C1C1E;
+    --color-bg-tertiary: #2C2C2E;
+    --color-bg-grouped: #000000;
+    --color-bg-grouped-secondary: #1C1C1E;
+    --color-label-primary: #FFFFFF;
+    --color-label-secondary: rgba(235,235,245,0.6);
+    --color-label-tertiary: rgba(235,235,245,0.3);
+    --color-label-quaternary: rgba(235,235,245,0.18);
+    --color-gray: #8E8E93;
+    --color-gray2: #636366;
+    --color-gray3: #48484A;
+    --color-gray4: #3A3A3C;
+    --color-gray5: #2C2C2E;
+    --color-gray6: #1C1C1E;
+    --color-separator: rgba(84,84,88,0.65);
+    --color-separator-opaque: #38383A;
+    --color-nav-bg: rgba(28,28,30,0.72);
+  }
+}
+
+/* ─── RESET & BASE ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--font-stack);
+  background: var(--color-bg-grouped);
+  color: var(--color-label-primary);
+  min-height: 100vh;
+  min-height: 100dvh;
+  overscroll-behavior: none;
+}
+
+/* ─── APP SHELL ────────────────────────────────────────────────────── */
+.app-shell { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
+
+/* ─── NAV BAR ──────────────────────────────────────────────────────── */
+.nav-bar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: calc(44px + env(safe-area-inset-top));
+  padding-top: env(safe-area-inset-top);
+  z-index: 100;
+  background: var(--color-nav-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  display: flex;
+  align-items: center;
+  padding-left: max(var(--space-4), env(safe-area-inset-left));
+  padding-right: max(var(--space-4), env(safe-area-inset-right));
+  gap: var(--space-3);
+  border-bottom: 0.5px solid transparent;
+  transition: border-color var(--duration-fast) ease-out;
+}
+.nav-bar.scrolled { border-bottom-color: var(--color-separator); }
+.nav-inline-title {
+  flex: 1;
+  font: 600 17px/22px var(--font-stack);
+  letter-spacing: -0.43px;
+  color: var(--color-label-primary);
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-bar.scrolled .nav-inline-title { opacity: 1; }
+.nav-count {
+  font: 400 13px/18px var(--font-stack);
+  letter-spacing: -0.08px;
+  color: var(--color-label-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.nav-theme-btn {
+  width: 32px; height: 32px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: var(--color-gray5);
+  color: var(--color-label-secondary);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  transition: background var(--duration-fast) ease, transform var(--duration-fast) var(--ease-dismiss);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .nav-theme-btn:active { transform: scale(0.92); }
+}
+
+/* ─── SCROLL VIEW ──────────────────────────────────────────────────── */
+.scroll-view {
+  flex: 1;
+  padding-top: calc(44px + env(safe-area-inset-top));
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* ─── LARGE TITLE BLOCK ────────────────────────────────────────────── */
+.large-title-block {
+  padding: var(--space-2) var(--space-5) 0;
+  background: var(--color-bg-grouped);
+}
+.large-title {
+  font: 700 34px/41px var(--font-stack);
+  letter-spacing: 0.37px;
+  color: var(--color-label-primary);
+}
+@media (max-width: 374px) {
+  .large-title { font-size: 28px; line-height: 34px; }
+}
+
+/* ─── SEARCH BAR ───────────────────────────────────────────────────── */
+.search-bar-wrap {
+  padding: var(--space-3) var(--space-4) var(--space-3);
+  background: var(--color-bg-grouped);
+  position: sticky;
+  top: calc(44px + env(safe-area-inset-top));
+  z-index: 90;
+}
+.search-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.search-icon {
+  position: absolute;
+  left: var(--space-3);
+  color: var(--color-label-tertiary);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+#search {
+  width: 100%;
+  height: 36px;
+  background: var(--color-bg-tertiary);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0 var(--space-3) 0 36px;
+  font: 400 17px/22px var(--font-stack);
+  letter-spacing: -0.43px;
+  color: var(--color-label-primary);
+  outline: none;
+  -webkit-appearance: none;
+  transition: box-shadow var(--duration-fast) ease;
+}
+#search::placeholder { color: var(--color-label-tertiary); }
+#search:focus { box-shadow: 0 0 0 4px rgba(255,107,53,0.22); }
+.search-cancel {
+  font: 400 17px/22px var(--font-stack);
+  letter-spacing: -0.43px;
+  color: var(--color-accent);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding-left: var(--space-3);
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.search-bar-wrap.active .search-cancel { display: block; }
+.search-bar-wrap.active #search { width: calc(100% - 72px); }
+
+/* ─── TABS / CHIPS ─────────────────────────────────────────────────── */
+.tabs-wrap {
+  position: sticky;
+  top: calc(44px + env(safe-area-inset-top) + 52px);
+  z-index: 80;
+  background: var(--color-bg-grouped);
+  padding: 0 var(--space-4) var(--space-3);
+}
+#tabs {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 2px;
+}
+#tabs::-webkit-scrollbar { display: none; }
+.tab {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  font: 400 15px/20px var(--font-stack);
+  letter-spacing: -0.24px;
+  color: var(--color-label-primary);
+  background: var(--color-bg-grouped-secondary);
+  border: 0.5px solid var(--color-separator-opaque);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  transition: background var(--duration-fast) ease, color var(--duration-fast) ease, border-color var(--duration-fast) ease, transform var(--duration-fast) var(--ease-dismiss);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tab:active { transform: scale(0.94); opacity: 0.8; }
+}
+.tab.active {
+  background: var(--color-accent);
+  color: #fff;
+  border-color: var(--color-accent);
+  font-weight: 600;
+}
+
+/* ─── CONTENT / GRID ───────────────────────────────────────────────── */
+.content {
+  padding: 0 var(--space-4) calc(var(--space-10) + env(safe-area-inset-bottom)) var(--space-4);
+}
+#grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+}
+@media (max-width: 1199px) { #grid { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 767px)  { #grid { grid-template-columns: 1fr; } }
+@media (min-width: 430px) and (max-width: 767px) {
+  .content { max-width: 430px; margin-inline: auto; }
+}
+
+/* ─── CARD ─────────────────────────────────────────────────────────── */
+.card {
+  background: var(--color-bg-grouped-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .card {
+    opacity: 0;
+    transform: translateY(8px);
+    animation: card-appear var(--duration-standard) var(--spring-appear) forwards;
+  }
+}
+@keyframes card-appear {
+  to { opacity: 1; transform: translateY(0); }
+}
+.card:hover { box-shadow: var(--shadow-2); }
+
+/* ─── PILL / CATEGORY BADGE ────────────────────────────────────────── */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  font: 700 10px/13px var(--font-stack);
+  letter-spacing: 0.07px;
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  padding: 3px var(--space-2);
+  align-self: flex-start;
+  flex-shrink: 0;
+}
+
+/* ─── CARD CONTENT ─────────────────────────────────────────────────── */
+.card-title {
+  font: 600 17px/22px var(--font-stack);
+  letter-spacing: -0.43px;
+  color: var(--color-label-primary);
+  margin-top: var(--space-2);
+  line-height: 1.35;
+}
+.card-body {
+  font: 400 13px/18px var(--font-stack);
+  letter-spacing: -0.08px;
+  color: var(--color-label-secondary);
+  line-height: 1.55;
+  max-height: 130px;
+  overflow-y: auto;
+  margin-top: var(--space-2);
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent) transparent;
+}
+.card-body::-webkit-scrollbar { width: 3px; }
+.card-body::-webkit-scrollbar-thumb { background: var(--color-accent); border-radius: 2px; }
+.card-body::-webkit-scrollbar-track { background: transparent; }
+
+/* ─── COPY BUTTON ──────────────────────────────────────────────────── */
+.copy-btn {
+  align-self: flex-end;
+  margin-top: var(--space-3);
+  height: 34px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  border: none;
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
+  font: 600 15px/20px var(--font-stack);
+  letter-spacing: -0.24px;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  transition: background var(--duration-fast) ease, color var(--duration-fast) ease, transform var(--duration-fast) var(--ease-dismiss), opacity var(--duration-fast) var(--ease-dismiss);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .copy-btn:active { transform: scale(0.96); opacity: 0.8; }
+}
+.copy-btn.copied {
+  background: rgba(52,199,89,0.14);
+  color: var(--color-green);
+}
+
+/* ─── EMPTY STATE ──────────────────────────────────────────────────── */
+#empty {
+  display: none;
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: var(--space-10) var(--space-6) var(--space-10);
+}
+.empty-icon {
+  width: 56px; height: 56px;
+  background: var(--color-bg-grouped-secondary);
+  border-radius: var(--radius-xl);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto var(--space-4);
+  box-shadow: var(--shadow-1);
+}
+.empty-icon svg { color: var(--color-label-tertiary); }
+.empty-headline {
+  font: 600 17px/22px var(--font-stack);
+  letter-spacing: -0.43px;
+  color: var(--color-label-primary);
+  margin-bottom: var(--space-1);
+}
+.empty-sub {
+  font: 400 15px/20px var(--font-stack);
+  letter-spacing: -0.24px;
+  color: var(--color-label-secondary);
+}
+
+/* ─── SEPARATOR (utility) ──────────────────────────────────────────── */
+.separator { height: 0.5px; background: var(--color-separator); }
+
+/* ─── FOCUS VISIBLE ────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ─── REDUCED MOTION ───────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .card { opacity: 1; transform: none; animation: none; }
+  .nav-inline-title, .copy-btn, .tab { transition: none; }
+}
+
+/* ─── DESKTOP SIDEBAR HINT (768px+) ───────────────────────────────── */
+@media (min-width: 1024px) {
+  .content { max-width: 1200px; margin-inline: auto; }
+}
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- NAV BAR -->
+  <header class="nav-bar" id="nav-bar" role="banner">
+    <span class="nav-inline-title" aria-hidden="true">Robbie's Prompt Library</span>
+    <span class="nav-count" id="count" aria-live="polite">105 of 105</span>
+    <button class="nav-theme-btn" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/>
+        <line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/>
+        <line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+    </button>
+  </header>
+
+  <!-- SCROLL VIEW -->
+  <div class="scroll-view">
+
+    <!-- LARGE TITLE -->
+    <div class="large-title-block" id="large-title-sentinel">
+      <h1 class="large-title">Prompt Library</h1>
+    </div>
+
+    <!-- SEARCH BAR -->
+    <div class="search-bar-wrap" id="search-bar-wrap">
+      <div class="search-field">
+        <span class="search-icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </span>
+        <label for="search" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">Search prompts</label>
+        <input id="search" type="search" placeholder="Search 105 prompts…" autocomplete="off" spellcheck="false" aria-label="Search prompts">
+        <button class="search-cancel" id="search-cancel" aria-label="Cancel search">Cancel</button>
+      </div>
+    </div>
+
+    <!-- CATEGORY TABS -->
+    <div class="tabs-wrap">
+      <nav id="tabs" role="tablist" aria-label="Filter by category"></nav>
+    </div>
+
+    <!-- GRID -->
+    <div class="content">
+      <main id="grid" role="main" aria-label="Prompt cards">
+        <div id="empty" role="status">
+          <div class="empty-icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </div>
+          <div class="empty-headline">No Prompts Found</div>
+          <div class="empty-sub">Try a different search or category.</div>
+        </div>
+      </main>
+    </div>
+
+  </div><!-- /scroll-view -->
+</div><!-- /app-shell -->
+
+<script>
+/* ─── DATA ─────────────────────────────────────────────────────────── */
+const CAT_COLORS = {"Job Search": "#4A90E2", "Resume & LinkedIn": "#7B68EE", "Operations & Analytics": "#27AE60", "Workforce Systems": "#E67E22", "Side Projects": "#E91E8C", "Self-Reflection": "#9B59B6", "Productivity": "#16A085"};
+const prompts = [{"id": 1, "category": "Job Search", "title": "Cold Application Cover Letter — Ops-to-Tech Pivot", "prompt": "I am a Department Manager at Lazy Acres Natural Market (Good Food Holdings, store #1827, Mission Hills San Diego) pivoting into HRIS, workforce analytics, and operations technology roles. My credentials include Dayforce HCM Super User designation, Power BI dashboard development, UC Davis SQL certification, StoreIQ Super User status, and P&L management for a 40-person prepared foods team. I also built an FOH Predictive Par System and a BI Gap Analysis that surfaced $10k per period in recoverable subcategory sales. Write me a complete cold cover letter for a blind application to a food service SaaS company like Toast, Deputy, or When I Work where I have no referral. It should open with operational credibility, bridge to my self-taught technical work, and close with a statement about what floor-level insight means for a product or implementation team. Return the full letter under 350 words, ready to send, no hollow openers or filler phrases."}, {"id": 2, "category": "Job Search", "title": "Warm Outreach Message to Hiring Manager at Target Company", "prompt": "I am a Department Manager at Lazy Acres Natural Market pivoting into HRIS and workforce management software roles, with a Dayforce HCM Super User designation, UC Davis SQL certification, Power BI experience, and 10+ years of operations management. I want to reach out on LinkedIn directly to a hiring manager at Dayforce/Ceridian, UKG, Deputy, Harri, or Infor for an implementations, customer success, or HRIS analytics role. Write two complete messages: (1) a connection request note under 300 characters naming one specific credential with a soft reason for reaching out, and (2) a follow-up message under 150 words to send after they accept, explaining my non-traditional background, naming one specific tool, and ending with a low-pressure ask for a 15-minute call. Label each with its type and character or word count."}, {"id": 3, "category": "Job Search", "title": "HRIS/WFM Role Fit Scorecard", "prompt": "I am a Department Manager at Lazy Acres Natural Market (Good Food Holdings) with Dayforce HCM Super User designation, Power BI, UC Davis SQL certification, StoreIQ Super User status, and case studies at robbiedownie.com covering an FOH Tracker, Predictive Par System, Compliance Documentation system, and BI Gap Analysis. I will paste a job description in my next message. When I do, return a table with five columns for every listed requirement and preferred qualification: Requirement, My Evidence, Fit Score (1–5), Gap Risk (Low/Medium/High), and Bridge Statement. After the table provide an overall fit percentage and a two-sentence go/no-go recommendation. Do not skip any listed qualification."}, {"id": 4, "category": "Job Search", "title": "HRIS Interview Question Bank with Model Answers", "prompt": "I am preparing for an HRIS Analyst interview. I am a Department Manager at Lazy Acres Natural Market with Dayforce HCM Super User designation, UC Davis SQL certification, Power BI experience, and StoreIQ Super User status, targeting roles at Ceridian, UKG, Deputy, and Harri. Generate a question bank of 15 interview questions split into three sections of five: behavioral questions (STAR format), technical and systems questions about HRIS/WFM platforms and data, and questions about my non-traditional background or career pivot. For each question write a first-person model answer of 3–5 sentences drawing specifically on my Dayforce, Power BI, SQL, or team management experience. Format as a numbered list with the question bolded and my answer below it."}, {"id": 5, "category": "Job Search", "title": "Salary Counter-Offer Script — $90k+ Target", "prompt": "I am a Department Manager at Lazy Acres Natural Market (Good Food Holdings) pivoting into HRIS and workforce technology roles and targeting compensation at or above $90,000, remote or hybrid. If I receive an offer below $90k, I need a complete negotiation script in first-person dialogue format covering four stages: opening statement after receiving the offer, counter ask with my number, handling pushback, and closing if they cannot meet $90k but can offer other compensation. Include three specific talking points for the ask grounded in my Dayforce Super User designation, UC Davis SQL certification, and P&L accountability. Format as four clearly labeled script stages."}, {"id": 6, "category": "Job Search", "title": "3-Touch Follow-Up Sequence After Applying", "prompt": "I am a Department Manager at Lazy Acres Natural Market making a career pivot into HRIS and workforce technology roles. Write me a three-email follow-up sequence: Email 1 five to seven business days after applying, Email 2 ten business days after applying with no response, and Email 3 fifteen business days after applying as a final check-in. Each email should be under 150 words, reflect my voice as a mid-career pivot candidate with real credentials (Dayforce HCM Super User, Power BI, SQL), and not sound generic or desperate. Include subject lines for all three. Format as three complete labeled email drafts."}, {"id": 7, "category": "Job Search", "title": "LinkedIn Tech Recruiter Outreach — Two Versions", "prompt": "I am a Department Manager at Lazy Acres Natural Market pivoting into HRIS, workforce analytics, and operations technology at $90k+ remote or hybrid. Write two recruiter outreach messages: Version A for a recruiter I have not connected with yet (a connection note under 300 characters plus a 100-word follow-up), and Version B for a recruiter I am already connected to (a 150-word direct message). Both should name my pivot clearly, list two credentials (Dayforce HCM Super User and UC Davis SQL certification), state my target and ask them to keep me in mind for relevant openings. Format as two labeled drafts with version, platform context, and word count noted."}, {"id": 8, "category": "Job Search", "title": "Hidden Requirements Decoder for a Job Description", "prompt": "I am a Department Manager at Lazy Acres Natural Market pivoting into HRIS and workforce management roles, with Dayforce HCM Super User designation, Power BI, and UC Davis SQL certification. I will paste a job description in my next message. When I do, analyze it for: (1) explicit requirements vs. implied unstated expectations, (2) three to five keywords I should mirror in my resume and cover letter, (3) any red flags given my non-traditional background, (4) what the role likely looks like day-to-day based on language used, and (5) my single strongest selling point for this role. Return each section labeled and clearly separated."}, {"id": 9, "category": "Job Search", "title": "Rebut the Overqualified or Wrong-Background Objection", "prompt": "I am a Department Manager at Lazy Acres Natural Market with 10+ years of operations experience, Dayforce HCM Super User designation, UC Davis SQL certification, and Power BI reporting capability, interviewing for HRIS Analyst and WFM technology roles where most candidates have a CS or HR degree. Write confident, rehearsed rebuttals for two objections: (1) 'You seem overqualified for an analyst-level role' and (2) 'Your background is in food service, not HRIS or technology.' Each rebuttal should be 4–6 sentences, reference a specific credential or project (a tool I built, a system I administered, or a certification), and close with a forward-looking statement about what I bring that a traditional candidate would not. Format as two labeled responses."}, {"id": 10, "category": "Job Search", "title": "Target Company Research Brief — Dayforce/Ceridian", "prompt": "I am preparing to apply and interview at Dayforce/Ceridian, my highest-priority target company given my Dayforce HCM Super User designation earned at Lazy Acres Natural Market. Write a one-page research brief covering: what Dayforce/Ceridian does and who their primary customers are, what roles they typically hire for that match my background, what differentiates them from UKG and Deputy, recent product or company news worth mentioning, and three questions I could ask a hiring manager that demonstrate genuine research. Then write a shorter three-bullet summary for UKG, Deputy, When I Work, and Harri using the same framework. Format with clearly labeled sections."}, {"id": 11, "category": "Job Search", "title": "LinkedIn Easy Apply Win-Rate Optimization Checklist", "prompt": "I am a Department Manager at Lazy Acres Natural Market using LinkedIn Easy Apply for HRIS Analyst and workforce technology roles. My profile features a Dayforce HCM Super User designation, UC Davis SQL certification, Power BI experience, and five published case studies at robbiedownie.com. Produce a numbered checklist of 10 specific actions I should confirm before hitting Easy Apply on any role, with one sentence per item explaining why it matters for a non-traditional pivot candidate. Then give me a triage framework: three criteria that make a role worth an Easy Apply, and three signals that should prompt me to skip Easy Apply and do direct outreach instead. Format as a checklist followed by a triage section."}, {"id": 12, "category": "Job Search", "title": "Five Bridge Statements — Food Service Ops to HRIS/WFM Roles", "prompt": "I am a Department Manager at Lazy Acres Natural Market (Good Food Holdings) with 10+ years of food service and retail operations experience applying to HRIS Analyst and WFM Specialist roles. Write me five distinct first-person talking points I can use in cover letters, LinkedIn summaries, and interviews to bridge my food service background to tech-adjacent roles. Each talking point must reference at least one specific credential or project: my Dayforce HCM Super User designation, UC Davis SQL certification, FOH Predictive Par System, Power BI BI Gap Analysis ($10k/period), or StoreIQ Super User status. Format as five numbered talking points, each 2–3 sentences, ready to use verbatim."}, {"id": 13, "category": "Job Search", "title": "Job Offer Evaluation Scorecard", "prompt": "I am a Department Manager at Lazy Acres Natural Market targeting my first HRIS, workforce analytics, or operations technology role at $90k+, remote or hybrid, Monday–Friday. Build me a job offer evaluation scorecard with six weighted categories: Base Salary (25%), Remote/Hybrid Flexibility (20%), Career Growth and Title Trajectory (20%), Company Stability and Product-Market Fit (15%), Benefits and PTO (10%), and Team Culture and Manager Quality (10%). For each category define what a score of 1, 3, and 5 looks like in concrete terms. Include a score interpretation guide for accept, negotiate, and decline thresholds, and three questions I should ask during the offer stage. Format as a complete scorecard."}, {"id": 14, "category": "Job Search", "title": "Rejection Processing and 48-Hour Recovery Plan", "prompt": "I am a Department Manager at Lazy Acres Natural Market making a career pivot into HRIS and workforce technology. I just received a rejection after a late interview stage. Help me with three things: (1) write a gracious rejection response email that keeps the door open and subtly asks for feedback, under 100 words; (2) give me five specific reflection questions to extract learning from this rejection, framed around my pivot narrative, interview performance, and positioning; and (3) write a 48-hour recovery action plan with two specific job search moves I should execute within two days to maintain momentum. Format as three clearly labeled sections."}, {"id": 15, "category": "Job Search", "title": "Weekly Job Search Sprint Plan", "prompt": "I am a Department Manager at Lazy Acres Natural Market in an active job search for HRIS, workforce analytics, and operations technology roles, working rotating opening and closing shifts while studying for my Power BI PL-300 certification and managing the Plato side project. Design a structured weekly job search sprint plan that fits my schedule. Include a specific daily time block and task for each day Monday through Sunday, a weekly target count for applications, outreach messages, and LinkedIn profile touches, a 30-minute weekly review checkpoint, and one repeating skill-building habit tied to PL-300 or SQL practice. Format as a day-by-day table with Day, Time Block, Primary Task, and Estimated Time columns."}, {"id": 16, "category": "Resume & LinkedIn", "title": "Reframe Ops Bullets as Systems/Tech Achievements", "prompt": "I am a Department Manager at Lazy Acres Natural Market writing resume bullets for HRIS Analyst and workforce technology roles. Rewrite these three raw bullets for a WFM or HRIS analyst-targeted resume: (1) Managed scheduling for a 40-person prepared foods team across multiple shifts; (2) Reduced food waste using a custom Excel-based par-tracking system I built; (3) Administered Dayforce HCM for time and attendance, scheduling, and compliance documentation. Each rewritten bullet must start with a strong action verb, include a quantified outcome where inferrable, name a specific tool or system, and signal systems thinking rather than people management. Return originals and rewrites side by side, labeled."}, {"id": 17, "category": "Resume & LinkedIn", "title": "ATS Keyword Gap Audit Against a Job Description", "prompt": "I am a Department Manager at Lazy Acres Natural Market with Dayforce HCM Super User designation, Power BI, UC Davis SQL certification, and StoreIQ Super User status. I will paste a job description in my next message. When I do, return: (1) a table of JD keywords with a Yes/No/Partial column indicating whether they appear based on my described background; (2) five specific keyword phrases I should add or strengthen on my resume ordered by importance; and (3) two skills from the JD where I have adjacent but not direct experience, each with a one-sentence cover letter bridge statement. Format all three sections clearly labeled."}, {"id": 18, "category": "Resume & LinkedIn", "title": "LinkedIn Headline A/B Test — Five Variants", "prompt": "I am a Department Manager at Lazy Acres Natural Market pivoting into HRIS, workforce analytics, and operations technology roles. My current headline is: 'Department Manager | Prepared Foods | Lazy Acres Natural Market.' My selling points are Dayforce HCM Super User, Power BI, UC Davis SQL certification, StoreIQ Super User, and 10+ years of food service operations. Write five alternative LinkedIn headline options under 220 characters each that clearly signal my pivot direction, include at least one specific credential, and use structurally distinct formats. After listing all five, rank them by estimated recruiter click-through for HRIS and WFM technology searches and give a one-sentence rationale for the top choice."}, {"id": 19, "category": "Resume & LinkedIn", "title": "LinkedIn About Section — Ops-to-Tech Pivot Narrative", "prompt": "I am a Department Manager at Lazy Acres Natural Market (Good Food Holdings, store #1827, Mission Hills San Diego) writing my LinkedIn About section. I am pivoting from food service operations management into HRIS analyst, WFM software, and operations technology roles. My brand statement is: 'I'm not changing my skillset. I'm changing the environment it lives in.' My credentials include Dayforce HCM Super User, Power BI (PL-300 in progress), UC Davis SQL certification, StoreIQ Super User, and five case studies at robbiedownie.com. Write a first-person About section in two to three short paragraphs around 300 words: a pivot hook, a credibility paragraph naming specific tools and accomplishments, and a clear statement of what I am looking for with an invitation to connect. Conversational and direct, not corporate."}, {"id": 20, "category": "Resume & LinkedIn", "title": "Featured Section Sequencing for HRIS Recruiter Conversion", "prompt": "I am a Department Manager at Lazy Acres Natural Market making a career pivot into HRIS and workforce technology. My LinkedIn Featured section can pin up to five items. My case studies at robbiedownie.com cover FOH Tracker (Excel/VBA), Predictive Par System (Power BI and Excel), Compliance Documentation automation, Menu Transition Analysis, and BI Gap Analysis ($10k/period). I also have a resume link and my homepage. Give me: (1) the optimal sequencing of featured items for an HRIS Analyst recruiter with a rationale for the order; (2) a 100-character click-optimized caption for each of the five case studies; and (3) one featured item I am missing that would strengthen the section. Format as a numbered list with captions below each item."}, {"id": 21, "category": "Resume & LinkedIn", "title": "LinkedIn Skills Section Optimization for HRIS and WFM", "prompt": "I am a Department Manager at Lazy Acres Natural Market applying to HRIS Analyst and WFM technology roles. My demonstrable skills include Dayforce HCM, StoreIQ, Microsoft Power BI, SQL (UC Davis certified), Excel including VBA, P&L management, labor scheduling, workforce analytics, compliance documentation, 40-person team management, and operational process design. Write: (1) the top 10 skills I should feature in my Skills section ordered by HRIS and WFM recruiter searchability; (2) three skills I should request endorsements for and what type of connection would be most credible; and (3) two adjacent skills I should add with a sentence each on how I can credibly claim them. Format as three numbered sections."}, {"id": 22, "category": "Resume & LinkedIn", "title": "Quantify Food Service Achievements for Tech Hiring Managers", "prompt": "I am a Department Manager at Lazy Acres Natural Market (Good Food Holdings) with experience at Domino's Pizza (GM) and Carrabba's Italian Grill (Sales Manager), applying to HRIS and workforce technology roles. Transform these four raw accomplishments into LinkedIn-ready resume bullets with a metric, scope indicator, and business outcome: managing labor costs for my prepared foods department; scheduling a 40-person team seven days a week using Dayforce HCM; reducing food waste through a par-system tool I built in Excel; and administering Dayforce for time, attendance, and compliance. Flag where I should insert a specific dollar or percentage to strengthen each bullet. Return the polished bullets."}, {"id": 23, "category": "Resume & LinkedIn", "title": "Case Study Resume Bullets — Dual Role Targeting Table", "prompt": "I have five case studies published at robbiedownie.com: (1) FOH Tracker (Excel/VBA); (2) Predictive Par System (Power BI and Excel, MAX(data-driven, floor par) logic, 9 weeks of data); (3) Compliance Documentation automation; (4) Menu Transition Analysis (Latin to Italian hot bar); (5) BI Gap Analysis (Power BI, $10k/period in surfaced sales gaps). For each case study write two resume bullet versions: Version A targeting an HRIS Analyst role and Version B targeting a WFM Implementation Specialist role. All bullets must start with a strong action verb, include a specific outcome, and name the tool used. Return as a table with columns: Case Study, Version A, Version B."}, {"id": 24, "category": "Resume & LinkedIn", "title": "Recruiter Magnet LinkedIn Profile Audit", "prompt": "I am a Department Manager at Lazy Acres Natural Market (Good Food Holdings) actively job searching for HRIS and workforce technology roles. Audit my LinkedIn profile based on these elements: Headline 'Department Manager at Lazy Acres | Dayforce HCM Super User | Power BI | SQL'; About covers my ops-to-tech pivot; Experience includes Lazy Acres DM 2019–present, Carrabba's Sales Manager, Domino's GM; Education includes UC Davis SQL cert, Google AI Professional Certificate (completed), PL-300 (in progress); Featured links to robbiedownie.com. Return a 10-point scorecard — score each element 1–5 with a one-sentence diagnosis — and a prioritized list of the top three changes I should make this week to improve recruiter search visibility for HRIS and WFM technology roles."}, {"id": 25, "category": "Resume & LinkedIn", "title": "Five LinkedIn Connection Request Note Templates", "prompt": "I am a Department Manager at Lazy Acres Natural Market (Good Food Holdings) making a career pivot into HRIS and workforce management software roles. Write five distinct LinkedIn connection request notes under 300 characters each for: (1) an HRIS analyst at a WFM company like Dayforce or UKG; (2) a recruiter specializing in HRtech placements; (3) someone who transitioned from operations into HRIS or tech; (4) a hiring manager at a target company after I applied to their role; and (5) a product manager at a food service SaaS company like Toast or MarginEdge. Each note must give a genuine and specific reason for connecting. Label each by scenario number."}, {"id": 26, "category": "Resume & LinkedIn", "title": "Cold InMail to HRtech Hiring Manager — Two Strategic Versions", "prompt": "I am a Department Manager at Lazy Acres Natural Market with Dayforce HCM Super User designation and Power BI experience, pivoting into HRIS analyst roles. Write two cold InMail versions for a hiring manager at a WFM software company where I have no existing connection: Version A leads with my Dayforce Super User credential and pivots to interest in their implementation or customer success team; Version B leads with the $10k per period in subcategory sales gaps I surfaced at Lazy Acres using Power BI and pivots to their analytics or operations team. Both under 250 words, include a specific ask for a 20-minute call, and avoid generic openers. Label each version with its intended target role type."}, {"id": 27, "category": "Resume & LinkedIn", "title": "LinkedIn Recommendation Request to Graham Pape", "prompt": "I am a Department Manager at Lazy Acres Natural Market (Good Food Holdings) and want to ask Graham Pape, Manager of HRIS and People Systems at Lovesac, for a LinkedIn recommendation that speaks to my HRIS knowledge, systems thinking, and career pivot credibility. Write the request message for LinkedIn. It should explain the type of role I am applying for (HRIS Analyst or WFM Specialist at an HRtech company), ask him to speak specifically to elements he can credibly address such as my Dayforce knowledge or approach to systems work, keep the ask specific rather than open-ended, and offer to draft a version he can edit. Warm but professional, under 200 words."}, {"id": 28, "category": "Resume & LinkedIn", "title": "Portfolio Link Placement Strategy — Five LinkedIn Locations", "prompt": "I am a Department Manager at Lazy Acres Natural Market with a portfolio website at robbiedownie.com featuring five published case studies covering operational and analytics projects. Tell me: (1) the exact five locations on LinkedIn where I should place a link to robbiedownie.com with a specific instruction for how to add it in each; (2) the anchor text or caption to use at each location to maximize recruiter click-through for HRIS and WFM roles; and (3) one platform outside LinkedIn where robbiedownie.com should appear to improve my discoverability with HRtech hiring managers. Format as a numbered list with location, how to add it, and recommended anchor text for each of the five LinkedIn spots."}, {"id": 29, "category": "Resume & LinkedIn", "title": "Open to Work Settings Strategy for a Pivot Candidate", "prompt": "I am a Department Manager at Lazy Acres Natural Market (Good Food Holdings) actively job searching for HRIS Analyst, WFM Specialist, and Operations Technology roles while currently employed. I want to use LinkedIn's Open to Work feature strategically. Tell me: (1) whether I should use the public green frame or the private recruiter-only setting, with a specific recommendation for a currently employed pivot candidate; (2) five specific job title strings I should list in Open to Work preferences to attract the right recruiter searches; (3) the location setting I should use given I am in San Diego and prefer remote but will consider hybrid; and (4) one profile update I should make before activating Open to Work to ensure the right inbound. Format as four numbered sections."}, {"id": 30, "category": "Resume & LinkedIn", "title": "Dayforce Super User — Four Resume and LinkedIn Framings", "prompt": "I am a Department Manager at Lazy Acres Natural Market with a Dayforce HCM Super User designation — I serve as the primary power user and internal trainer for Dayforce covering time and attendance, scheduling, and compliance documentation for a 40+ person team. Write four ways to present this credential on job application materials: (1) a single achievement bullet with a quantified outcome; (2) a skills-section entry with a parenthetical depth description; (3) a certification-style entry for a Credentials section; and (4) a two-sentence professional summary statement. For each version, include one sentence explaining why this framing works for HRIS or WFM hiring managers. Format as four numbered options with explanations."}, {"id": 31, "category": "Operations & Analytics", "title": "DAX Measure — Period-over-Period Sales for 28-Day Fiscal Calendar", "prompt": "I use Microsoft Power BI for departmental sales and labor reporting at Lazy Acres Natural Market (Good Food Holdings). I need a DAX measure that compares current period sales to the same period last year using a non-standard 28-day fiscal period structure rather than calendar months. Write the DAX measure for period-over-period variance in percentage terms: handle missing prior period data by returning BLANK, format with line breaks and inline comments explaining each clause, and use VAR declarations for readability. After the measure, list three things I need to verify in my data model before it will work correctly — table relationships, date table coverage, and mark-as-date-table status. Return the complete DAX measure followed by the checklist."}, {"id": 32, "category": "Operations & Analytics", "title": "SQL Query — Subcategory Revenue by Fiscal Period with POP Change", "prompt": "I am building a SQL query for Lazy Acres Natural Market. My three tables are: transactions (transaction_id, date, item_id, quantity, revenue), items (item_id, item_name, subcategory, category, department), and calendar (date, period_number, fiscal_week, day_of_week). I need total revenue and transaction count by subcategory for the last four complete 28-day fiscal periods with a period-over-period revenue change column. Write the full query in ANSI SQL compatible with SQLite using CTEs with a comment above each CTE. After the query, list three additional analyses I could run against this same schema to investigate the specific causes of a subcategory sales decline like the $10k per period gap I found at the Lazy Acres salad and hot food bars."}, {"id": 33, "category": "Operations & Analytics", "title": "P&L Metrics to Executive Narrative — Monthly Business Review", "prompt": "I am a Department Manager at Lazy Acres Natural Market (Good Food Holdings) preparing my monthly business review narrative for my store director. This period: $142,000 total sales (flat vs. prior period), 34.2% food cost (up 1.8 points), 28.7% labor cost (down 0.6 points), shrink 3.1% (up from 2.4%). Write a two-paragraph executive narrative I can deliver verbally or submit as a written summary. Paragraph one describes what happened in plain terms naming the standout positive and the concerning metric. Paragraph two explains the most likely root cause of the food cost increase and my action plan in three concrete steps. First person, direct and confident, no hedging. Under 200 words."}, {"id": 34, "category": "Operations & Analytics", "title": "FOH Predictive Par System Logic Refinement", "prompt": "I built a FOH Predictive Par System at Lazy Acres Natural Market using 9 weeks of Power BI sales data exports. It calculates production targets as MAX(data-driven forecast, floor par) on a 3-day prep cycle in a static Excel file requiring manual data updates. Identify: (1) three logic improvements to the MAX formula to account for day-of-week variation or promotional demand spikes in a grocery prepared foods context; (2) two ways to reduce the manual data import burden without a full ETL pipeline using standard Microsoft 365 access; and (3) one KPI I should add to the dashboard to detect when floor pars are consistently being hit more than the data-driven number, signaling they need to be raised. Return as three labeled sections."}, {"id": 35, "category": "Operations & Analytics", "title": "BI Gap Analysis STAR Story for Interview", "prompt": "I conducted a BI Gap Analysis at Lazy Acres Natural Market (Good Food Holdings) using the GFH Ops Hub in Power BI Service. The analysis surfaced approximately $10,000 per period in underperformance in the Salad and Hot Food subcategories of my Prepared Foods department by comparing my store's subcategory performance against the chain average. The gap was concentrated in items per transaction and transaction frequency. Write me a 90-second first-person STAR story (Situation, Task, Action, Result) I can deliver in an interview when asked 'Tell me about a time you used data to identify a business problem.' Make it punchy, specific, and close with the $10k figure as the concrete result. Under 250 words, ready to rehearse."}, {"id": 36, "category": "Operations & Analytics", "title": "StoreIQ Export Data — Three Proactive Performance Analyses", "prompt": "I am a Department Manager at Lazy Acres Natural Market and a StoreIQ Super User. StoreIQ is the task management and compliance platform used chain-wide by Good Food Holdings. I receive weekly task completion rate exports by employee, shift, and department but currently review them only reactively. Tell me: (1) three specific analyses I could run on StoreIQ completion export data in Excel or Power BI to identify performance patterns before they become compliance issues, with the column setup needed for each; (2) one Power BI visualization from this data that would be a strong portfolio artifact in a Dayforce HCM or WFM role interview; and (3) one specific way I could use this data to support a formal performance conversation with a direct report. Format as three labeled sections."}, {"id": 37, "category": "Operations & Analytics", "title": "Food Cost Variance Root Cause Investigation Table", "prompt": "I am a Department Manager at Lazy Acres Natural Market. This period my food cost came in at 34.2%, which is 1.8 percentage points above my 32.4% target. Write two things: (1) a clear verbal explanation of the most likely root causes of a 1.8-point food cost overage in a grocery prepared foods department, structured as three causes in priority order based on what this size overage typically signals (over-production, shrink, receiving discrepancies, pricing errors, or wastage logging gaps); and (2) a three-row investigation table with columns for Root Cause, Where to Look (what data or physical check to run), and Corrective Action If Confirmed, populated for my three most likely causes. Return both sections labeled."}, {"id": 38, "category": "Operations & Analytics", "title": "Data-Driven Labor Scheduling Framework for Interview", "prompt": "I am a Department Manager at Lazy Acres Natural Market (Good Food Holdings) scheduling a 40+ person prepared foods team using Dayforce HCM, and want to describe a data-driven scheduling methodology in interviews for WFM Specialist and HRIS Analyst roles. Write a structured framework for data-driven labor scheduling using only tools I already have: Dayforce HCM, Power BI, and Excel. Cover what input data I would use, how I would calculate target labor hours per day, how I would account for variable demand on weekends and during promotions, and how I would measure scheduling accuracy over time. Frame it as a first-person explanation I could deliver in an interview, around 250 words."}, {"id": 39, "category": "Operations & Analytics", "title": "Power BI Dashboard Architecture Plan — Department P&L", "prompt": "I am a Department Manager at Lazy Acres Natural Market (Good Food Holdings) building a Power BI dashboard to replace manual Excel reports. My data sources in Microsoft 365 are: a weekly POS sales export (item-level, date, quantity, revenue), a Dayforce HCM labor export (hours worked, cost, position, date), and a food cost export (expected vs. actual cost, variance). I want this dashboard useful for daily operations and presentable as a portfolio piece for analytics job applications. Write a dashboard architecture plan covering: the four core report pages and what each shows, the three most important overview KPIs, any DAX measures I need to create that do not exist in the raw data, and one interactive feature that would add meaningful operational utility. Format as a structured planning document."}, {"id": 40, "category": "Operations & Analytics", "title": "BI Gap Analysis Full Case Study — UX Portfolio Format", "prompt": "I completed a BI Gap Analysis at Lazy Acres Natural Market (Good Food Holdings, store #1827) using the GFH Ops Hub in Power BI Service, surfacing approximately $10,000 per period in subcategory underperformance in the Salad and Hot Food areas of my Prepared Foods department. I also submitted an IT enhancement request to add SubCategory as a selectable filter column in the Ops Hub. Write a structured case study in UX portfolio format: Problem Statement, Context and Constraints, My Approach (step by step), Tools Used, Key Findings, Business Impact, and What I Would Do Differently. Write in first person at a level appropriate for a hiring manager reviewing my portfolio for an operations analytics or HRIS role. Target 400–500 words."}, {"id": 41, "category": "Operations & Analytics", "title": "SQL Schema Design — Ops Compliance Tracking Database", "prompt": "I am building a SQL database to track operational compliance in my prepared foods department at Lazy Acres Natural Market. I need a normalized schema for three tracking areas: daily food safety temperature logs (item, time, temperature, employee, pass/fail), production completion records (item, target quantity, actual quantity, date, shift), and task completion records (task name, assigned employee, due time, completion time, date, completed boolean). Write the CREATE TABLE statements in ANSI SQL compatible with SQLite with appropriate data types, primary keys, foreign key relationships where they make sense, and a brief comment above each table. After the schema, write two SQL queries: one producing a weekly compliance summary per employee and one flagging tasks completed more than 30 minutes past their due time."}, {"id": 42, "category": "Operations & Analytics", "title": "Explaining Power BI, Dayforce, and the Par System to Non-Technical Interviewers", "prompt": "I am a Department Manager at Lazy Acres Natural Market (Good Food Holdings) interviewing for HRIS Analyst and operations technology roles. Many hiring managers will be unfamiliar with food service operations and I need to explain my tools in terms they connect to. Write a 60-second first-person verbal explanation for each of these three tools for a non-technical hiring manager: (1) Dayforce HCM — what it is, what I used it for, and what that demonstrates about my HRIS capability; (2) Power BI — what I built, what business question it answered, and what that reveals about my analytics approach; (3) My FOH Predictive Par System — what problem it solved and what it says about my systems thinking. Each explanation should be 3–4 jargon-free sentences closing by connecting the tool to my next role. Format as three labeled explanations."}, {"id": 43, "category": "Operations & Analytics", "title": "Period-over-Period Sales Analysis Narrative — Four-Part Store Director Presentation", "prompt": "I am a Department Manager at Lazy Acres Natural Market presenting period-over-period sales to my store director. Period 7 vs. Period 6: total $141,800 vs. $146,000 (-2.9%); Salad $28,400 vs. $31,200 (-9.0%); Hot Food $52,300 vs. $53,600 (-2.4%); Grab and Go $35,100 vs. $35,800 (-2.0%); Bakery $26,000 vs. $25,400 (+2.4%). Write a four-part narrative: (1) two-sentence executive summary; (2) subcategory breakdown identifying the primary decline driver and the one positive outlier; (3) two specific and plausible root cause hypotheses for the Salad decline; and (4) recommended actions for next period — one for Salad and one for Hot Food. First person, as if presenting verbally. Target 200–250 words total."}, {"id": 44, "category": "Operations & Analytics", "title": "$10k Subcategory Gap Story — Three Versions for Three Contexts", "prompt": "I conducted a subcategory sales gap analysis at Lazy Acres Natural Market (Good Food Holdings, store #1827) that identified $10,000 per period in underperformance in the Salad and Hot Food subcategories using the GFH Ops Hub in Power BI Service. The gap was in items per transaction for Salad and transaction frequency for Hot Food. Write three versions of this story: (1) a 30-second elevator pitch version for a 'tell me about yourself' context; (2) a two-minute behavioral interview answer for 'tell me about a time you used data to drive a business decision'; and (3) a 200-word LinkedIn post that showcases the project to my professional network and positions me as an analytics-forward operations professional. Label each version clearly."}, {"id": 45, "category": "Operations & Analytics", "title": "FOH Task Tracker Methodology Explanation — Interview Script", "prompt": "I built an FOH Task Completion Tracker at Lazy Acres Natural Market using Excel and VBA. It monitored prep task completion rates by employee and shift across my prepared foods department, was recognized by leadership outside my department, and was used to diagnose team performance gaps. Write a structured methodology explanation in four parts I can deliver as a 300-word first-person verbal explanation: (1) the business problem that existed before the tracker; (2) the technical design — how the Excel/VBA system was structured and how data was entered; (3) the analysis layer — what reporting it produced and how managers used it; and (4) the business outcome — what decisions changed because of it. Every sentence must be specific to this tool with no generic language."}, {"id": 46, "category": "Workforce Systems", "title": "Dayforce HCM Interview Answers — Four Core Questions", "prompt": "I am preparing for an HRIS Analyst interview with hands-on Dayforce HCM Super User experience from Lazy Acres Natural Market (Good Food Holdings). Write first-person model answers for these four expected questions: (1) 'What Dayforce modules have you used and what did you use them for?'; (2) 'As a Super User, what did that designation mean in practice?'; (3) 'Have you been involved in a Dayforce configuration change or process improvement?'; (4) 'How would you apply your Dayforce experience in this HRIS Analyst role?' Each answer should be 4–6 sentences drawing specifically on my time and attendance, scheduling, and compliance documentation work at Lazy Acres, at appropriate technical depth for a Ceridian or UKG interviewer. Format as four labeled Q&A pairs."}, {"id": 47, "category": "Workforce Systems", "title": "Dayforce Super User — Four Resume and Profile Credential Framings", "prompt": "I am a Department Manager at Lazy Acres Natural Market with Dayforce HCM Super User designation covering time and attendance, scheduling, and compliance documentation for a 40+ person team. Write four alternative presentations of this credential for job application materials: (1) a single achievement bullet with a quantified outcome; (2) a skills-section entry with a brief parenthetical describing the depth of the designation; (3) a certification-style entry under a Credentials section; and (4) a two-sentence professional summary statement. For each of the four versions, add one sentence explaining why this framing works specifically for HRIS or WFM hiring managers. Format as four numbered options with explanations."}, {"id": 48, "category": "Workforce Systems", "title": "StoreIQ Use Cases for WFM Role Interviews", "prompt": "I am a StoreIQ Super User at Lazy Acres Natural Market (Good Food Holdings). StoreIQ is the chain-wide task management and operational compliance platform used by Good Food Holdings. I need to articulate my StoreIQ experience convincingly in WFM Specialist and HRIS Analyst interviews at companies like Dayforce, UKG, or Deputy that may not know the platform. Write three use case descriptions, each 3–4 sentences, demonstrating: workflow design and task administration, compliance monitoring and reporting, and team performance tracking. Then write a two-sentence translation statement explicitly connecting my StoreIQ Super User experience to skills a WFM hiring manager would recognize: platform administration, workflow configuration, and data-driven team management. Format as three labeled use cases plus a Translation section."}, {"id": 49, "category": "Workforce Systems", "title": "Scheduling Workflow SOP — Dayforce HCM, 40-Person Team", "prompt": "I am a Department Manager at Lazy Acres Natural Market (Good Food Holdings) scheduling a 40-person prepared foods team using Dayforce HCM and want to document this as a portfolio-quality SOP for WFM role interviews. Write a professional SOP with these sections: Purpose and Scope; Tools Used (Dayforce HCM, StoreIQ); Inputs Required (sales forecast, availability matrix, period labor budget); Step-by-Step Weekly Scheduling Cycle (8–12 numbered steps from creation through publication and adjustment); Key Decision Points (what triggers a post-publication schedule change); and a Scheduling Quality Checklist (8–10 checkboxes to complete before publishing). Professional but readable language, each section clearly labeled. Format as an internal operations process document."}, {"id": 50, "category": "Workforce Systems", "title": "WFM Implementation Project Scope Document — Portfolio Artifact", "prompt": "I am preparing to interview for a WFM Implementation Specialist role. I am a Department Manager at Lazy Acres Natural Market where I used Dayforce HCM as a Super User and built scheduling and compliance workflows for a 40+ person team. I have not done implementation work professionally but have deep end-user and administrator experience. Write a hypothetical WFM implementation project scope document I can discuss in interviews to demonstrate my understanding of what implementation work involves. Cover: Project Overview, Stakeholder Roles (customer, vendor, project lead), Key Configuration Decisions (scheduling rules, pay codes, leave types), Data Migration Considerations, Training and Change Management, and a simplified 8-week implementation timeline. Format as a structured document suitable as a portfolio artifact."}, {"id": 51, "category": "Workforce Systems", "title": "Headcount Modeling Explanation and Template for HRIS Interview", "prompt": "I am a Department Manager at Lazy Acres Natural Market (Good Food Holdings) managing labor cost for a 40+ person prepared foods team within my departmental P&L. Write three things for use in HRIS Analyst or WFM Specialist interviews: (1) a 90-second verbal explanation of how I think about headcount modeling in my current role — inputs I use, how I project labor needs, and how I account for turnover and scheduling constraints; (2) a simple headcount model template structure — specific columns and rows — that I could describe as the kind of model I would build in Excel or an HRIS tool for a 40–50 person hourly department; and (3) one question I could ask an interviewer about their headcount modeling process that demonstrates sophisticated WFM and HRIS understanding. Format as three numbered sections."}, {"id": 52, "category": "Workforce Systems", "title": "Three Compliance Document Templates — Corrective Action, Food Safety Exception, Verbal Counseling", "prompt": "I am a Department Manager at Lazy Acres Natural Market (Good Food Holdings) who creates and maintains compliance documentation for a 40+ person team and wants professional, defensible templates. Write three templates: (1) a corrective action form with fields for employee name, date, incident description, policy cited, prior warnings, corrective action taken, employee acknowledgment, and manager signature; (2) a food safety log exception report for missing or out-of-range logs with fields for date, item, normal range, actual reading, corrective action taken, and supervisor review date; and (3) a verbal counseling documentation form for performance conversations. For each template include all fields as a fillable document structure and a brief best-practice note on when and how to use it. Label each with a bold header."}, {"id": 53, "category": "Workforce Systems", "title": "California Labor Law Talking Points for WFM Interviews", "prompt": "I am a Department Manager at Lazy Acres Natural Market (Good Food Holdings) in California managing 40+ hourly employees. California has strict labor laws including daily overtime after 8 hours, seventh-consecutive-day overtime, mandatory meal and rest breaks, and split shift premiums. I want to articulate my labor law awareness clearly in HRIS Analyst and WFM Specialist interviews at companies serving California customers. Write first-person talking points for five California-specific topics: (1) daily overtime calculation in Dayforce; (2) meal and rest break compliance monitoring; (3) predictive scheduling requirements and schedule publication timing; (4) seventh-day premium pay in a seven-day operation; and (5) split shift premiums. Each should be 2–3 sentences I could deliver in an interview referencing my practical experience at Lazy Acres. Format as five labeled talking points."}, {"id": 54, "category": "Workforce Systems", "title": "Absence Management Process Document", "prompt": "I am a Department Manager at Lazy Acres Natural Market (Good Food Holdings) managing leave and unplanned absence for a 40+ person prepared foods team using Dayforce HCM. I want to document this as a portfolio artifact for WFM Specialist interviews. Write a process document covering: Absence Types and Definitions (unplanned call-out, FMLA, personal day, no-call-no-show); My Process for Each Type in Dayforce and operationally; Documentation Standards (what I record and where); Escalation Criteria (when HR is involved); Coverage Planning (how I fill same-day gaps); and Pattern Monitoring (how I identify recurring absence issues). Write in first person as a department manager, 3–5 sentences per section with clear headers. Format as a professional process document."}, {"id": 55, "category": "Workforce Systems", "title": "ROI Argument for WFM System Implementation — Five Drivers", "prompt": "I am preparing to argue the business value of workforce management systems in interviews for WFM Specialist and HRIS Analyst roles. My background includes using Dayforce HCM as a Super User at Lazy Acres Natural Market for scheduling, time and attendance, and compliance for a 40+ person team. Write a structured ROI argument for WFM system implementation I can use when asked 'Why do companies invest in WFM software?' covering five drivers: labor cost optimization, compliance risk reduction, manager time savings, employee experience improvement, and data visibility for business decisions. For each driver write 2–3 sentences drawing on a specific example from my Lazy Acres experience or a plausible quantifiable outcome. Close with a one-paragraph unified business case statement. Format as five labeled sections plus the closing paragraph."}, {"id": 56, "category": "Workforce Systems", "title": "Bridge Dayforce Experience to UKG/Kronos Context", "prompt": "I have extensive Dayforce HCM Super User experience at Lazy Acres Natural Market but many target employers use UKG (formerly Kronos and Ultimate Software). I need to credibly discuss my ability to work in UKG despite no direct experience. Write: (1) a two-sentence interview statement bridging my Dayforce experience to UKG naming what conceptually transfers (scheduling logic, pay code configuration, compliance rules) and what I would need to learn; (2) a side-by-side comparison of Dayforce vs. UKG Pro Workforce Management across five areas: scheduling, time and attendance, leave management, analytics/reporting, and mobile experience; and (3) a 30-day self-study plan to get up to speed on UKG Pro using free or low-cost resources. Format as three labeled sections."}, {"id": 57, "category": "Workforce Systems", "title": "HRIS Data Flows — Clock-In to Payroll, Verbal Interview Explanation", "prompt": "I am a Department Manager at Lazy Acres Natural Market with Dayforce HCM Super User status, interviewing for HRIS Analyst roles. A technical interviewer may ask me to explain HRIS data flows. Write a clear accurate explanation structured as a walkthrough of what happens when an employee clocks in using Dayforce: from the clock-in action through time data capture, schedule comparison, exception flagging, manager review and approval, payroll integration, and reporting visibility. Write in first person, 4–6 paragraphs, demonstrating I understand the system at a data flow level beyond simple end-user knowledge. Include one question I could ask an interviewer about their HRIS data flow that demonstrates technical depth. Format as paragraphs followed by the question."}, {"id": 58, "category": "Workforce Systems", "title": "New Employee Onboarding Workflow — Dayforce and StoreIQ Integration", "prompt": "At Lazy Acres Natural Market (Good Food Holdings), I onboard new employees in my prepared foods department — setting them up in Dayforce HCM, completing compliance paperwork, scheduling training shifts, and conducting initial performance check-ins. I want to present this as a designed workflow artifact for WFM or HRIS interviews. Write a formal onboarding workflow document covering five phases: Pre-Start Day, Day 1, Week 1, 30-Day Check-In, and System Touchpoints (where Dayforce and StoreIQ are specifically used). Format with phases, numbered steps within each phase, and a Responsible Party column. Professional, suitable as a portfolio document."}, {"id": 59, "category": "Workforce Systems", "title": "WFM Vendor Landscape Comparison Brief — Six Platforms", "prompt": "I am preparing for WFM software company interviews and want to demonstrate understanding of the competitive landscape. My direct experience is with Dayforce HCM (Ceridian) and StoreIQ (Good Food Holdings). Write a vendor landscape comparison brief for six platforms — Dayforce, UKG Pro WFM, Deputy, When I Work, Harri, and Infor WFM. For each write a four-line profile: primary customer segment, signature capability, one key differentiator vs. Dayforce, and one likely interview question I'd face at that company. Format as a two-column table with Platform and Profile columns. After the table, write two sentences answering 'Why are you specifically interested in our platform?' for a Dayforce/Ceridian interviewer given my Super User background."}, {"id": 60, "category": "Workforce Systems", "title": "SOP — Full Scheduling Workflow with Exception Handling", "prompt": "I am a Department Manager at Lazy Acres Natural Market (Good Food Holdings) and want to document my complete scheduling process as a portfolio-quality SOP for WFM Specialist interviews — covering a 40-person prepared foods team using Dayforce HCM from schedule creation through publication, employee notification, and real-time adjustments. Write the SOP with these sections: Purpose and Scope; Roles and Responsibilities; Tools and System Access Required; Weekly Scheduling Cycle (step-by-step with timeframes); Exception Handling (late call-outs, coverage requests, overtime alerts, California seventh-day triggers); Communication Standards for post-publication changes; and a Scheduling Quality Checklist (8–10 checkboxes before publishing). Include a brief executive summary at the top. Format as a clearly labeled professional document."}, {"id": 61, "category": "Side Projects", "title": "Cold Outreach to San Diego Restaurant Owner — Email and DM", "prompt": "I run a side project called Plato where I build websites for independent San Diego restaurants using a demo-first model — I build a free demo site before the first conversation, then show it to the owner. I want to reach out cold to independent restaurants in North Park, South Park, and Hillcrest with outdated websites or no web presence. Write two outreach templates: Version A is an email introducing Plato, stating I already built a free demo for their restaurant, proposing a specific time to see it, and including a low-pressure close — under 150 words, personal and local, not corporate. Version B is a direct Instagram DM version adapted for the casual DM context, under 75 words. Label each version with format, word count, and key copy difference."}, {"id": 62, "category": "Side Projects", "title": "Plato Demo Pitch Script — 5-Minute In-Person Meeting", "prompt": "I run Plato, a side project building websites for independent San Diego restaurants using a demo-first model. When I meet with a restaurant owner to show them the free demo I built for their business, I need a structured 5-minute pitch script that feels conversational, not scripted. Write the complete script covering: an opening that frames the no-obligation demo context; a demo walkthrough highlighting three specific features (mobile-first design, menu display, and a reservation or ordering link); the transition from demo viewing to the offer presentation; and a soft close that invites questions rather than pushing for a decision. Include stage directions in brackets for when to turn the laptop, pause, or let silence work. Write the full script, every word, as I would say it."}, {"id": 63, "category": "Side Projects", "title": "Objection Handler — Five Variations of 'We Already Have a Website'", "prompt": "I run Plato, a side project building websites for independent San Diego restaurants. Write responses for five variations of the 'we already have a website' objection: (1) 'We already have a website, we're good'; (2) 'Our website is on Squarespace and works fine'; (3) 'We don't really get customers from our website anyway'; (4) 'We use Instagram for everything'; and (5) 'We looked into this before and it was too expensive.' Each response should be 3–4 sentences, genuinely acknowledge what the owner said without dismissing it, name one specific Plato value point, and end with an open question that keeps the conversation moving forward. Format as five labeled responses."}, {"id": 64, "category": "Side Projects", "title": "Plato Pricing Tier Structure — Three Tiers and Two Add-Ons", "prompt": "I run Plato, a side project building websites for independent San Diego restaurants, and need a pricing structure simple enough to explain verbally, easy for first-time clients to say yes to, and with room for upsells. Design a three-tier structure: Tier 1 under $500 for small or new restaurants, Tier 2 as the main offering for established restaurants, and Tier 3 as a premium package with ongoing management or advanced features. For each tier provide a name, price point, 5–8 included line items, the ideal client profile, and a one-sentence verbal pitch line. After the three tiers, suggest two add-on services including an AI menu assistant add-on, each with a price and one-sentence description. Format as three labeled tier cards plus an add-ons section."}, {"id": 65, "category": "Side Projects", "title": "Plato Project Scope Document — New Client Onboarding", "prompt": "I run Plato, a side project building restaurant websites in San Diego. When a restaurant owner agrees to work with me I need to set scope clearly to avoid scope creep. Write a standard project scope document to share with new clients covering: Project Overview, Deliverables (specific pages, features, mobile responsive design), What's Included vs. Not Included (explicit exclusions such as photography and copywriting), Client Responsibilities (logo, photos, menu PDF, hours, bio), Timeline (business days per phase from discovery to launch), Revision Policy (rounds included), and Hosting and Maintenance (included or separate). Professional but friendly, under 400 words, suitable for a non-technical restaurant owner. Use no jargon."}, {"id": 66, "category": "Side Projects", "title": "Post-Demo Follow-Up Sequence — Email and Text Versions", "prompt": "I run Plato, building restaurant websites in San Diego using a demo-first model. After an in-person demo where the owner shows interest but does not commit, I need a follow-up sequence. Write three messages: Message 1 the same day after the meeting, Message 2 three business days later with no response, and Message 3 seven business days later as a final check-in. Each under 100 words, referencing something from the demo (using [something they mentioned] as a personalization placeholder), advancing toward a decision without pressure, with a clear low-stakes call to action. Write each in two formats: email with subject line and text message version. Label each message and its formats clearly."}, {"id": 67, "category": "Side Projects", "title": "AI Upsell Explanation for Restaurant Owners — Verbal Script", "prompt": "I run Plato, building websites for independent San Diego restaurants, and want to offer an AI menu assistant as an upsell — a chat widget that lets visitors ask questions about the menu, dietary options, hours, and specials. Many of my clients are non-technical restaurant owners who may not understand or trust AI features. Write a 150-word verbal explanation of this upsell I can deliver naturally in a sales conversation. It should describe what the feature does in plain language, give one specific example of a customer question it answers automatically, explain the business benefit to the owner, address the most likely concern about accuracy in one reassuring sentence, and close with a one-sentence value statement. Natural and conversational, not a product spec sheet."}, {"id": 68, "category": "Side Projects", "title": "Referral Ask Script After Project Delivery", "prompt": "I run Plato, building restaurant websites in San Diego. After delivering a completed website to a satisfied client I want to ask for referrals in a way that earns genuine introductions rather than vague 'let me know if you know anyone' responses. Write a referral ask script covering: genuine appreciation for their trust, a brief reference to a positive outcome from the site launch, a specific and easy-to-act-on ask for one or two specific restaurant owner friends they could introduce me to, and an offer to make it easy by reaching out directly once they send a quick introduction. Write one in-person conversation version and one follow-up text or email version, each under 100 words. Label each version clearly."}, {"id": 69, "category": "Side Projects", "title": "Plato Portfolio Page Copy — All Sections", "prompt": "I run Plato, a side project building websites for San Diego restaurants, and want to build a dedicated Plato portfolio page. Write full copy for these sections: Hero (one headline and one subheadline explaining what Plato is and who it's for, under 15 words each); Process (three steps describing the demo-first model in plain language); Sample Work (placeholder copy for two to three client thumbnails with one-line descriptions); Pricing Callout (one paragraph summarizing pricing); About (3–4 sentences on who I am as Plato's founder referencing my operations background and San Diego connection); and Contact/CTA (a brief call to action with a button label). Warm, direct, local-business voice — no agency speak, no hollow marketing phrases."}, {"id": 70, "category": "Side Projects", "title": "Plato Elevator Pitch — Five Versions for Five Contexts", "prompt": "I run Plato, a side project building websites for independent San Diego restaurants using a demo-first model — I build a free demo site before asking for any commitment. Write five versions of a one-paragraph elevator pitch for Plato, each under 80 words, each with a structurally distinct opening angle: Version 1 leads with the demo-first model as the differentiator; Version 2 leads with a restaurant owner's pain point; Version 3 leads with a local San Diego angle; Version 4 leads with ROI framing for the restaurant owner; and Version 5 is written for a social media bio in casual first-person voice. Label each version with its intended use context."}, {"id": 71, "category": "Side Projects", "title": "Target Restaurant Identification Criteria and Pre-Qualification Routine", "prompt": "I run Plato, building websites for San Diego restaurants. I want to identify strong prospects before building a demo rather than approaching restaurants randomly. Write a target restaurant identification framework covering: (1) a checklist of five signals that indicate a good Plato prospect — no website, outdated site, low Google reviews relative to apparent quality, active Instagram but no web presence, recently opened; (2) three signals that indicate a restaurant is not a good fit right now; (3) the three San Diego neighborhoods I should prioritize first based on density of independent restaurants with weak online presence; and (4) a five-minute phone-based pre-qualification research routine I can run before building any demo. Format as four labeled sections."}, {"id": 72, "category": "Side Projects", "title": "Plato Proposal Email Template", "prompt": "I run Plato, building restaurant websites in San Diego. After a restaurant owner shows interest following a demo, I send a formal proposal email. Write a template I can personalize for each client covering: a subject line, an opening referencing our demo meeting and their restaurant by name (using [Restaurant Name] as the only placeholder), a two-sentence summary of what they receive, the specific pricing tier I am proposing with the price stated, a concise timeline from deposit to launch, a clear next steps section telling them exactly what to do to proceed, and a signature block with my name and Plato. Professional but warm, under 300 words, like a real person who cares about their specific business. Use [Restaurant Name] as the only placeholder."}, {"id": 73, "category": "Side Projects", "title": "Plato Project Timeline and Deliverables One-Pager", "prompt": "I run Plato, building restaurant websites in San Diego, and need a standard project timeline and deliverables document to include in proposals. Write a 14-day project timeline one-pager covering four phases: Phase 1 Discovery and Content Collection (days 1–3, what I need from them); Phase 2 Design and Development (days 4–9, what I am building); Phase 3 Review and Revisions (days 10–12, review rounds included); and Phase 4 Launch and Handoff (days 13–14, what happens at launch and what they receive). For each phase list 3–5 specific tasks or deliverables, who is responsible, and any dependencies. Include a callout box highlighting the three things clients most often delay — logo file, menu PDF, and photo assets — so they prepare these before Day 1."}, {"id": 74, "category": "Side Projects", "title": "Competitive Positioning vs. Squarespace and Wix", "prompt": "I run Plato, building restaurant websites in San Diego. My main competition in sales conversations is not other agencies but DIY platforms like Squarespace and Wix. Write: (1) a one-sentence positioning statement for Plato relative to Squarespace and Wix; (2) a side-by-side comparison table with five rows — Setup Time, Design Quality, Local Restaurant Expertise, Ongoing Owner Burden, and Restaurant-Specific Features — and three columns: Plato, Squarespace, and Wix, each cell in plain language a restaurant owner understands; and (3) two talking points for when an owner says 'I've heard Squarespace is pretty easy, why should I pay for Plato?' Each talking point should be 2–3 sentences ending with a specific Plato advantage. Format as positioning statement, table, and two labeled talking points."}, {"id": 75, "category": "Side Projects", "title": "First Plato Client Case Study Template", "prompt": "I run Plato, building restaurant websites in San Diego, and am completing my first client project. Write a case study template I can fill in with this client's details for my portfolio. Cover: Client and Context (restaurant type, size, location, prior web presence); The Problem (why they needed a new site); My Process (discovery, design, build, review, launch — 1–2 sentences per phase); What I Built (2–3 specific features addressing their core problem); The Outcome (metrics if available, otherwise qualitative impact); and a Testimonial Placeholder section. Write the template in portfolio webpage format with each section labeled and 2–4 sentences of guided placeholder content I replace with real details. Warm, professional, results-oriented voice."}, {"id": 76, "category": "Self-Reflection", "title": "Obsidian Daily Note Template — Full Morning and Evening Structure", "prompt": "I use Obsidian as my primary note-taking and journaling tool and want a daily note template I can use consistently. Generate a complete daily note template including: a date header in YYYY-MM-DD format, a Morning Intention section with 2–3 guided prompts, a Wins and Gratitude section with three bullet slots, a Challenges and Tensions section with a prompt to name one specific friction point, a Work Focus section for my top three tasks, a Job Search section for one specific search action for today, an Evening Reflection section with three questions (what worked, what did not, what I am carrying into tomorrow), and a Free Write section. Format in valid Obsidian markdown using callout blocks and H2 headers. After the template, add one sentence rationale per section."}, {"id": 77, "category": "Self-Reflection", "title": "Weekly Review Facilitation — 12 Questions Across Six Life Areas", "prompt": "I maintain a personal journaling practice in Obsidian and a physical bullet journal and do a structured weekly review every Sunday evening. Facilitate my weekly review with 12 questions — two for each of these six areas: Job Search Progress, Work and Team Management at Lazy Acres, Relationship with Ari, Physical Health (boxing and running), Personal Growth and Learning (SQL, Power BI, reading), and Mindset and Emotional Patterns. After each question include a blank line for my written answer. After all 12 questions, add a Themes and Patterns section with two prompts: one asking what theme appeared across multiple areas this week, and one asking what single action next week would have the greatest positive impact across multiple areas simultaneously. Format in Obsidian markdown with clear section headers."}, {"id": 78, "category": "Self-Reflection", "title": "Monthly Theme Identification — Five Options for My Current Moment", "prompt": "I practice setting a monthly theme — a focus word or phrase that guides my attention and intentions for the month. Based on my current life context, generate five potential monthly theme options. My context: active job search for HRIS and operations technology roles while studying for Power BI PL-300; managing a complex team situation at Lazy Acres including a challenging direct report; in a relationship with my partner Ari I want to invest in more intentionally; and doing reflection work connected to my fearful-avoidant attachment style and my 'Am I Wanted?' primal question pattern. For each theme provide: the theme word or phrase, a one-sentence explanation of why it fits now, one morning intention prompt, and one evening reflection question. Close with a recommendation for which theme to choose and why. Format as five labeled theme cards plus a recommendation."}, {"id": 79, "category": "Self-Reflection", "title": "IFS Parts Work — Anxious Job Search Avoidance", "prompt": "I practice Internal Family Systems (IFS) as a self-reflection framework. Facilitate a guided IFS parts work journaling session focused on the anxious, contracted feeling that shows up in my job search — the sensation that arises when I have not heard back from an application or when I notice myself avoiding sending outreach messages and defaulting to organizing my Obsidian vault instead. The session should include: an opening grounding check-in with two questions; identification of the part with prompts to describe where I feel it in my body, what it looks like, and what I might call it; getting curious with the part using 4–5 open questions; listening for what the part is protecting; a message from Self to the part; and a closing integration prompt. Format as a guided sequence with each section labeled and prompts in italics."}, {"id": 80, "category": "Self-Reflection", "title": "Fearful-Avoidant Pattern Identification in a Recent Interaction", "prompt": "I have a fearful-avoidant attachment style and notice this pattern in professional relationships, in my job search, and in some moments with my partner Ari. Walk me through a five-part journaling exercise for identifying fearful-avoidant activation in a specific recent interaction: (1) describe the interaction factually without interpretation; (2) identify the specific moment the shift happened — when did I want to pull back, go quiet, or over-explain?; (3) name the underlying fear or perceived threat that was activated; (4) identify the behavioral response I chose and what I wish I had done instead; and (5) write one sentence representing what my secure self would have said or done. Close with a prompt: what is this pattern protecting and what does it cost me? Format as five labeled journaling sections with a closing prompt."}, {"id": 81, "category": "Self-Reflection", "title": "Am I Wanted? Primal Question Journaling Session", "prompt": "I have been working with a personal growth framework from a book called Primal Questions that identifies core emotional questions driving our patterns — mine is 'Am I Wanted?' This question surfaces in my job search, in my relationship with Ari, in team dynamics at Lazy Acres, and in how I interpret silence or lack of response from others. Write a structured journaling session titled 'Am I Wanted? — A Working Through' with five sections: (1) identify three recent situations where this question was activated even subtly; (2) explore what 'being wanted' specifically means to me — what would it look like, feel like, and prove?; (3) examine one situation where I assumed I was not wanted but may have been misreading the signal; (4) explore what I would do differently if I operated from the assumption that I am wanted by default; and (5) a closing integration prompt. Format as a guided sequence with labeled sections."}, {"id": 82, "category": "Self-Reflection", "title": "Values Clarification Exercise — Three-Part Facilitated Session", "prompt": "I want to do a values clarification exercise to reconnect with what I actually care about versus what I think I should care about. My context: I am in a career transition from food service operations into HRIS and technology roles, I live in San Diego with my partner Ari and our dog Bagel, and I engage in boxing, running, cooking, guitar, photography, journaling, and Hearthstone. Facilitate a three-part values clarification exercise: Part 1 presents me with 20 value words and asks me to identify my top 7 without overthinking; Part 2 takes my stated top 7 and asks three distinguishing questions per value to separate genuinely core values from externally conditioned ones; Part 3 guides me in writing a 3–4 sentence values statement integrating my confirmed top three values into a usable north star. Write all three parts now as a complete facilitated sequence."}, {"id": 83, "category": "Self-Reflection", "title": "Behavioral Pattern Recognition Exercise on a Journal Entry", "prompt": "I journal regularly in Obsidian and want to develop the habit of recognizing behavioral patterns across my entries rather than just recording individual events. Teach me how to do a behavioral pattern recognition exercise. First explain the methodology in 3–4 sentences. Then walk me through it using this representative journal entry written in my voice: 'Didn't send the outreach messages I planned to send today. Spent 45 minutes updating my Obsidian vault instead. Felt a vague sense of dread when I opened my inbox. Told myself tomorrow will be better. Went to the gym and had a solid boxing session — that part felt good. Finished the evening watching two hours of Hearthstone streams instead of working on the portfolio case study I said I would finish this week.' Identify three behavioral patterns present, name each one, explain what it might be signaling, and suggest one reflection question to investigate each further."}, {"id": 84, "category": "Self-Reflection", "title": "Reframe a Job Rejection Through Attachment Lens", "prompt": "I recently received a rejection after reaching a late interview stage for an HRIS Analyst role and want to process it through the lens of my fearful-avoidant attachment style rather than catastrophizing or dismissing. Write a guided journaling session in five parts: Part 1 Grounding — the facts of what happened without interpretation; Part 2 The Story I Am Telling — what narrative did I immediately construct and is it accurate?; Part 3 Attachment Activation — did I feel rejected as a person or in a professional context, and what is the difference?; Part 4 Evidence Audit — three pieces of concrete evidence that contradict the rejection narrative; Part 5 Integration — one honest grounded statement about what this experience actually means, and one specific action I will take in the next 24 hours that reflects genuine belief in my own value. Format as five labeled journaling sections."}, {"id": 85, "category": "Self-Reflection", "title": "Temporal Discounting Check-In — Job Search and Personal Life", "prompt": "I am familiar with temporal discounting — the bias to overvalue immediate rewards and undervalue future ones — and recognize it in my job search behavior, where I avoid the discomfort of outreach in favor of lower-stakes tasks. Facilitate a structured temporal discounting check-in in four parts: Part 1 presents two prompts to identify one area in my job search and one in my personal life where temporal discounting is currently active; Part 2 walks me through a 10/10/10 reframe for each identified area — how will I feel about this choice in 10 minutes, 10 months, and 10 years?; Part 3 writes one if-then implementation intention for each area; and Part 4 closes with one grounding question reconnecting me to why the future-oriented choice matters to me personally. Format as four labeled journaling sections."}, {"id": 86, "category": "Self-Reflection", "title": "Relationship Communication Debrief with Ari", "prompt": "I want to do a structured communication debrief after a conversation with my partner Ari where I did not show up the way I wanted to. My growth edge in relationships is moving from over-explaining or going quiet under stress toward authentic, grounded communication — especially when I feel unseen or suspect Ari is frustrated. Write a guided five-part relationship communication debrief for my Obsidian journal: Part 1 describe the conversation factually — what was said and what I noticed in myself; Part 2 identify the moment I shut down, deflected, or over-explained; Part 3 what was the underlying need I had that I did not express directly?; Part 4 write what I wish I had said — not the right answer, just the honest one; Part 5 write a brief plan for a follow-up conversation with Ari. Close with a prompt about what secure communication looks like for me. Five labeled sections."}, {"id": 87, "category": "Self-Reflection", "title": "Processing Workplace Friction — Team Management Stress", "prompt": "I am a Department Manager at Lazy Acres Natural Market managing a 40+ person team including an ongoing personnel situation involving performance documentation and communication friction with a direct report. The stress of managing team conflict while job searching and studying for certifications creates background tension I carry into evenings. I want to process this through journaling rather than letting it compound. Write a four-part workplace friction processing journaling session: Part 1 Decompress — two prompts to externalize the stress factually without judgment or problem-solving; Part 2 Separate the Solvable from the Unsolvable — identify what is within my control and what is not; Part 3 The Hidden Cost — how is this friction showing up in my job search energy, relationship with Ari, and physical health?; Part 4 One Grounded Action — the single most useful thing I can do about this tomorrow, and the single most important thing I can let go of tonight. Four labeled journaling sections."}, {"id": 88, "category": "Self-Reflection", "title": "Career Identity Journaling — Caught Between Two Worlds", "prompt": "I am in a career transition from food service operations management into HRIS and technology roles. My sense of professional identity is caught between two places — I am still a Department Manager at Lazy Acres but no longer fully identify with that role as my future self. Write a five-part career identity journaling session: Part 1 Who am I professionally right now — 3-sentence honest description including the parts that feel stuck; Part 2 Who am I becoming — 3-sentence aspirational description of the professional I am moving toward in the HRIS and operations technology space; Part 3 The Bridge — what specific things I am already doing that prove the transition is real (certifications, portfolio, tools built, Plato); Part 4 The Dissonance — what part of my current identity is hardest to let go of and why; Part 5 write a one-sentence professional identity statement for who I am becoming. Format as five labeled journaling sections."}, {"id": 89, "category": "Self-Reflection", "title": "Specificity-Based Gratitude Practice — Three-Round Journaling", "prompt": "I want to develop a more specific and meaningful gratitude practice. My current habit tends toward generic entries — 'I am grateful for my health, my relationship, my job' — and I want to go deeper by anchoring gratitude to specific moments, sensory details, and people. Walk me through a specificity-based gratitude journaling practice in three rounds. Round 1 asks three questions designed to surface a specific moment from the last 24 hours — not a category but one concrete moment involving a person, a feeling, or a specific experience. Round 2 asks me to describe that moment in full sensory detail and identify which personal need of mine was met in it. Round 3 asks me to write a brief gratitude statement I could say to the person involved if there was one, and explore what it would feel like to actually tell them. Write all three rounds as a facilitated sequence with prompts in italics."}, {"id": 90, "category": "Self-Reflection", "title": "End-of-Week Self-Assessment — Five-Section Honest Review", "prompt": "I want to do an honest end-of-week self-assessment that goes beyond a productivity review and looks at how I actually showed up. Write a structured assessment in five sections: Section 1 Integrity Check — three yes/no questions asking whether I did what I said I would do this week in job search actions, skill-building, and team management; Section 2 Energy Report — two prompts asking where I gave my best energy and where I showed up noticeably depleted; Section 3 Relationship Quality — two prompts about my quality of presence with Ari and with my team at Lazy Acres; Section 4 Learning and Growth — one prompt about what I learned from SQL study, Power BI work, or a difficult situation, and one about a belief I want to challenge next week; Section 5 Next Week's Non-Negotiable — the single most important action I will take, and the emotional state I intend to bring to Monday morning. Five labeled sections with prompts in italics."}, {"id": 91, "category": "Productivity", "title": "Obsidian Vault Structure — Job Search, Work, Plato, and Personal Life", "prompt": "I use Obsidian as my primary knowledge management tool and want a vault structure supporting my job search, work at Lazy Acres Natural Market, Plato side project, certifications (Power BI PL-300 and SQL), and personal journaling and reflection practice. Design a complete vault folder structure with no more than seven root folders, logical subfolders, and naming conventions that stay scannable at a glance. Format as an indented list, then explain the organizing principle in 2–3 sentences. List five templates I should create immediately with a description of what each should contain. Suggest three Obsidian plugins that would meaningfully improve this vault for job search tracking, daily journaling, and project management, with one sentence of explanation per plugin. Format as three clearly labeled sections."}, {"id": 92, "category": "Productivity", "title": "Job Search Map of Content (MOC) — Obsidian", "prompt": "I use Obsidian as my primary knowledge management tool and want to create a Map of Content for my job search — a hub note linking to all related notes providing a navigable overview. Create a complete Job Search MOC template with wiki-link sections for: Target Companies (Dayforce/Ceridian, UKG, Deputy, Toast, When I Work, Harri, Infor), Role Research (HRIS Analyst, WFM Specialist, Ops Tech), Application Tracker, Interview Prep, Resume Versions, Cover Letter Templates, Networking Contacts, and Weekly Sprint Logs. For each section write 1–2 sentences describing what notes live there and what to update weekly. At the top include a Status Dashboard with fields for Total Applications, Active Interviews, Current Focus, and This Week's Priority. Write the full MOC in valid Obsidian markdown with H2 headers and double-bracket wiki-links."}, {"id": 93, "category": "Productivity", "title": "Bullet Journal Weekly Spread Design", "prompt": "I use a physical bullet journal alongside Obsidian and want a weekly spread design that complements my digital system rather than duplicating it. Design a weekly spread for a standard two-page dot-grid format including: a weekly intention header top of left page; a day-by-day planning grid spanning both pages (Mon–Wed left, Thu–Sun right); a Job Search Tracker box for applications sent, outreach messages, responses, and interviews scheduled; a Skill-Building Log box with checkboxes for Power BI PL-300 and SQL study sessions; a Plato Progress box for demo builds and client conversations; a four-to-five item habit tracker row; and a Weekly Capture box for ideas destined for Obsidian. For each section describe its approximate size in grid squares, its position on the spread, and the exact fields or bullet points it contains. Format as a layout description I can follow while drawing the spread."}, {"id": 94, "category": "Productivity", "title": "Implementation Intentions for PL-300 Study Habit", "prompt": "I am studying for the Microsoft Power BI PL-300 certification via Coursera while working full-time as a Department Manager at Lazy Acres Natural Market on rotating opening and closing shifts, running an active job search, and managing the Plato side project. Write five implementation intentions for my PL-300 study habit in the format 'If/when [situation], then I will [specific behavior] for [duration or specific action].' Each should be concrete, anchored to a specific daily trigger already in my routine such as arriving home, making morning coffee, or opening my laptop, and realistic for both opening shift and closing shift days. After the five statements, write one paragraph explaining the behavioral science of why implementation intentions outperform simple goal-setting for people with irregular work schedules. Format as five numbered if-then statements followed by the explanation paragraph."}, {"id": 95, "category": "Productivity", "title": "Temporal Discounting Reframe — Break LinkedIn Outreach Avoidance Today", "prompt": "I experience temporal discounting around sending LinkedIn outreach messages and cold emails for my job search. Each day I delay this task I tell myself I will do it tomorrow when I feel more ready or confident. Use the temporal discounting reframe technique to help me act on this specific task today. Structure the reframe in four steps written in second person directly addressing me: (1) name the immediate cost I am paying right now in the present moment by avoiding this task — not the future cost, the now cost; (2) project forward 90 days and describe the cumulative impact of continuing to avoid this for 90 more days as a vivid specific scenario; (3) make the future reward concrete — describe one specific positive outcome that becomes possible if I complete five outreach messages today, in vivid and specific terms; and (4) give me a micro-commitment I can make in the next five minutes to break the inertia right now."}, {"id": 96, "category": "Productivity", "title": "Second-Brain Capture Workflow — Phone, Laptop, and Bullet Journal", "prompt": "I use a second-brain approach to capture information I encounter — insights from Hard Fork and Practical AI podcasts, HRIS and WFM technology articles, job search learnings, and Plato ideas — but my capture workflow is inconsistent and things get lost between my phone, laptop, and bullet journal. Design a frictionless capture workflow for three contexts: (1) on my phone during commute or at work (fast and frictionless); (2) at my laptop in the evening with time for deeper processing; and (3) in my bullet journal during morning or evening rituals. For each context specify: which capture tool I should use from my existing apps, the exact form the capture takes, when and how it gets processed into Obsidian, and one rule that prevents the system from becoming a new source of cognitive load. Format as three labeled context blocks."}, {"id": 97, "category": "Productivity", "title": "Two-Week Job Search Sprint Plan", "prompt": "I want to run a focused two-week job search sprint starting this coming Monday with the goal of advancing at least one application to interview stage and expanding my active pipeline from three to eight open applications. I work full-time as a Department Manager at Lazy Acres National Market on rotating shifts and want to protect time for Plato and Power BI PL-300 study. Create a two-week project plan covering: Sprint Goal and Success Criteria, Week 1 Daily Actions (specific task per day Mon–Sun with realistic time estimate), Week 2 Daily Actions (specific task per day Mon–Sun with time estimate), and a definition of the five highest-priority applications to send in Week 1 based on my background. Format as a structured plan with clearly labeled phases and a daily task table for each week."}, {"id": 98, "category": "Productivity", "title": "Daily Shutdown Ritual Script — 10 to 15 Minutes", "prompt": "I want a consistent daily shutdown ritual that closes out the workday at Lazy Acres Natural Market, transitions me into job search or personal time, and prevents work stress from bleeding into evenings with Ari and time for boxing, guitar, and personal development. Write a daily shutdown ritual script I can complete in 10–15 minutes including: a task capture step for anything unfinished or top-of-mind from work; a review step checking my bullet journal for what I said I would do today; an acknowledgment step naming one specific thing I did well; a transition step with a physical or environmental cue that signals the workday is ending; a job search check for one 3-minute task to advance my search; and an evening intention step naming one meaningful activity I will prioritize tonight. Write as a numbered script with timing for each step and a brief note on why that step matters. Format as a numbered ritual script."}, {"id": 99, "category": "Productivity", "title": "Obsidian Tag Taxonomy — Two-Level System", "prompt": "I use Obsidian as my personal knowledge management system and want a tag taxonomy that is useful without becoming a maintenance burden. My main use areas are: job search and career pivot, work operations at Lazy Acres, Plato side project, certifications and skill-building (Power BI PL-300 and SQL), self-reflection and journaling, personal productivity, and creative interests (boxing, guitar, photography, cooking). Design a two-level tag taxonomy with no more than eight top-level tags in #tag format, logical child tags in #parent/child format, and a rule for when to use tags versus folders. Present the full taxonomy as an indented list. Add three usage guidelines that will keep the system maintainable over time: when to add a new tag, when to merge tags, and when to delete or archive tags. Format as the taxonomy list followed by the three guidelines."}, {"id": 100, "category": "Productivity", "title": "Weekly Priority Triage Process — 20-Minute Sunday Routine", "prompt": "I manage competing priorities across my job at Lazy Acres National Market (opening and closing shifts, team management, P&L), job search (applications, outreach, interviews), Power BI PL-300 certification study, Plato side project, and personal wellbeing. I want a repeatable 20-minute weekly priority triage I can run every Sunday evening to determine my top three priorities for the coming week. Write the triage framework covering: a brain dump step to get everything out of my head; a sorting step using a simple 2x2 matrix with four labeled quadrants and examples of what types of tasks from my life live in each; a selection step with rules for picking my top three weekly priorities from the matrix; and a constraint check with three questions confirming my top three are actually achievable given my shift schedule and energy. Format as a step-by-step triage process with each step labeled and timed."}, {"id": 101, "category": "Productivity", "title": "Energy-Based Task Scheduling — Opening Shift vs. Closing Shift Versions", "prompt": "My cognitive energy varies significantly by shift type at Lazy Acres National Market. On opening shifts starting at 5–6 AM I have high energy in the morning and crash by mid-afternoon. On closing shifts ending at 9–10 PM I have low energy in the morning and peak performance in the afternoon and evening. Design an energy-based task scheduling guide with two versions: Version A for opening shift days and Version B for closing shift days. For each version provide a timeline from wake-up to bedtime with three to four labeled energy blocks (Peak, Moderate, Low, Wind-Down), the types of tasks most suited to each block drawn from my actual categories (job search strategy, SQL study, cover letter writing, email, Obsidian capture, LinkedIn browsing), and one anti-pattern I should avoid in each energy state. Format as two labeled schedules with a brief introduction."}, {"id": 102, "category": "Productivity", "title": "Habit Stack Design — Anchor Habits Linked to New Behaviors", "prompt": "I want to design a habit stack connecting my existing daily anchors to the new habits I am building: daily SQL or Power BI study, a daily job search action, daily journaling, and consistent sleep timing. My current anchors are morning coffee, post-boxing or post-run shower, arriving home from Lazy Acres, and evening wind-down. Design a complete habit stack system with: the four anchor habits described briefly, one new habit stacked onto each anchor chosen from my target habit list, a written habit stack statement for each in 'After I [anchor], I will [new habit], for [duration]' format, and a troubleshooting note for each stack identifying the most likely failure mode and one protection against it. Close with a brief paragraph on how to evaluate the system after two weeks and what signals indicate I should adjust the design. Format as four labeled habit stacks followed by the evaluation paragraph."}, {"id": 103, "category": "Productivity", "title": "Reduce Morning Decision Fatigue — Two Protocols for Two Shift Types", "prompt": "I experience decision fatigue in my morning routine especially on opening shift days at Lazy Acres, leading to too long deciding what to work on, immediate phone checking after waking up, and inconsistent habit execution. Design standardized morning routine protocols for two scenarios. Scenario A: Opening shift day (wake-up 4:30–5:00 AM, limited time before leaving for work). Scenario B: Day off or closing shift day (no morning time constraint). For each scenario design a routine that requires zero decisions to start (the first action is predetermined), has a maximum of five steps, completes in 30 minutes or less for Scenario A and 60 minutes or less for Scenario B, includes a job search touch and a brief journaling moment, and ends with a clear transition signal. Write each as a numbered step-by-step protocol with timing. Format as two labeled protocols."}, {"id": 104, "category": "Productivity", "title": "Obsidian and Bullet Journal Integration Protocol", "prompt": "I use Obsidian for digital notes and knowledge management and a physical bullet journal for daily planning, capture, and ritual. I want these two systems to be a coherent whole rather than competing systems. Design an integration protocol defining the role of each system and the handoff between them. Cover: the division of responsibilities (what lives in Obsidian vs. the bullet journal with a rule for edge cases), the daily sync workflow (one brief step morning and one evening to keep systems aligned), the weekly consolidation process (how I move bullet journal captures into Obsidian on Sundays), the specific note types that always live in Obsidian (evergreen notes, project MOCs, case studies, templates), and the specific captures that always stay in the bullet journal (daily logs, habit tracking, fleeting notes, weekly spreads). Format as a protocol document with clearly labeled sections and a one-sentence decision rule for each section."}, {"id": 105, "category": "Productivity", "title": "Quarterly Review Template — Eight Life Areas", "prompt": "I want a structured quarterly review template I can use in Obsidian every 90 days covering eight life areas: Career and Job Search, Skill-Building and Certifications (Power BI PL-300 and SQL), Work at Lazy Acres (department performance, team health), Plato Side Project, Relationship with Ari, Physical Health (boxing and running), Personal Growth and Self-Reflection, and Financial and Career Planning. Write a complete quarterly review template including: a Quarter in Review header with date and quarter number; a Wins section (3–5 most significant wins across all areas); a Challenges section (3 most significant difficulties with one learning from each); an Area-by-Area Assessment (one paragraph per life area rated 1–10 with a one-sentence score explanation); a Themes and Patterns section (two patterns when looking at the quarter as a whole); a Next Quarter Intentions section (one specific goal per area as an implementation intention); and a one-sentence statement of the quarter's defining theme. Write the full template in Obsidian markdown with headers and placeholder prompts in italics."}];
+
+/* ─── STATE ─────────────────────────────────────────────────────────── */
+let activeCategory = "All";
+let searchQuery = "";
+
+/* ─── DARK MODE ────────────────────────────────────────────────────── */
+const html = document.documentElement;
+const themeBtn = document.getElementById("theme-toggle");
+const moonIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+const sunIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+
+function isDark() {
+  if (html.dataset.theme === "dark") return true;
+  if (html.dataset.theme === "light") return false;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+function syncThemeIcon() {
+  themeBtn.innerHTML = isDark() ? sunIcon : moonIcon;
+  themeBtn.setAttribute("aria-label", isDark() ? "Switch to light mode" : "Switch to dark mode");
+}
+themeBtn.addEventListener("click", () => {
+  const going = isDark() ? "light" : "dark";
+  html.setAttribute("data-theme", going);
+  syncThemeIcon();
+});
+syncThemeIcon();
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncThemeIcon);
+
+/* ─── NAV SCROLL ───────────────────────────────────────────────────── */
+const navBar = document.getElementById("nav-bar");
+const sentinel = document.getElementById("large-title-sentinel");
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    navBar.classList.toggle("scrolled", !e.isIntersecting);
+  });
+}, { rootMargin: "-44px 0px 0px 0px", threshold: 0 });
+io.observe(sentinel);
+
+/* ─── SEARCH FOCUS ─────────────────────────────────────────────────── */
+const searchWrap = document.getElementById("search-bar-wrap");
+const searchEl = document.getElementById("search");
+const cancelBtn = document.getElementById("search-cancel");
+searchEl.addEventListener("focus", () => searchWrap.classList.add("active"));
+cancelBtn.addEventListener("click", () => {
+  searchEl.value = "";
+  searchQuery = "";
+  searchWrap.classList.remove("active");
+  searchEl.blur();
+  renderTabs();
+  renderGrid();
+});
+
+/* ─── HELPERS ──────────────────────────────────────────────────────── */
+function hexToRgba(hex, a) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+function getFiltered() {
+  return prompts.filter(p => {
+    const mc = activeCategory === "All" || p.category === activeCategory;
+    const q = searchQuery.toLowerCase();
+    const ms = !q || p.title.toLowerCase().includes(q) || p.prompt.toLowerCase().includes(q);
+    return mc && ms;
+  });
+}
+function countForCat(cat) {
+  const q = searchQuery.toLowerCase();
+  return prompts.filter(p => {
+    const mc = cat === "All" || p.category === cat;
+    const ms = !q || p.title.toLowerCase().includes(q) || p.prompt.toLowerCase().includes(q);
+    return mc && ms;
+  }).length;
+}
+
+/* ─── RENDER TABS ──────────────────────────────────────────────────── */
+function renderTabs() {
+  const tabsEl = document.getElementById("tabs");
+  tabsEl.innerHTML = "";
+  const cats = ["All", ...Object.keys(CAT_COLORS)];
+  cats.forEach(cat => {
+    const count = countForCat(cat);
+    const tab = document.createElement("button");
+    tab.className = "tab" + (cat === activeCategory ? " active" : "");
+    tab.textContent = cat === "All" ? `All (${count})` : `${cat} (${count})`;
+    tab.setAttribute("role", "tab");
+    tab.setAttribute("aria-selected", cat === activeCategory ? "true" : "false");
+    tab.setAttribute("aria-label", `Filter by ${cat}, ${count} prompts`);
+    if (cat !== activeCategory && cat !== "All") {
+      tab.style.setProperty("--tab-color", CAT_COLORS[cat]);
+    }
+    tab.addEventListener("click", () => {
+      activeCategory = cat;
+      renderTabs();
+      renderGrid();
+    });
+    tabsEl.appendChild(tab);
+  });
+}
+
+/* ─── RENDER GRID ──────────────────────────────────────────────────── */
+function renderGrid() {
+  const filtered = getFiltered();
+  const grid = document.getElementById("grid");
+  const empty = document.getElementById("empty");
+  grid.querySelectorAll(".card").forEach(c => c.remove());
+  document.getElementById("count").textContent = `${filtered.length} of ${prompts.length}`;
+  if (filtered.length === 0) {
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+  filtered.forEach((p, i) => {
+    const color = CAT_COLORS[p.category];
+    const card = document.createElement("article");
+    card.className = "card";
+    card.style.animationDelay = `${Math.min(i * 30, 300)}ms`;
+
+    const pill = document.createElement("span");
+    pill.className = "pill";
+    pill.textContent = p.category;
+    pill.style.backgroundColor = hexToRgba(color, 0.14);
+    pill.style.color = color;
+
+    const title = document.createElement("div");
+    title.className = "card-title";
+    title.textContent = p.title;
+
+    const body = document.createElement("div");
+    body.className = "card-body";
+    body.textContent = p.prompt;
+
+    const btn = document.createElement("button");
+    btn.className = "copy-btn";
+    btn.setAttribute("aria-label", `Copy prompt: ${p.title}`);
+    btn.textContent = "Copy";
+    btn.addEventListener("click", () => {
+      const done = () => {
+        btn.textContent = "✓ Copied";
+        btn.classList.add("copied");
+        setTimeout(() => { btn.textContent = "Copy"; btn.classList.remove("copied"); }, 1500);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(p.prompt).then(done).catch(() => { fallback(p.prompt); done(); });
+      } else { fallback(p.prompt); done(); }
+    });
+
+    card.appendChild(pill);
+    card.appendChild(title);
+    card.appendChild(body);
+    card.appendChild(btn);
+    grid.appendChild(card);
+  });
+}
+
+/* ─── FALLBACK COPY ────────────────────────────────────────────────── */
+function fallback(text) {
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.cssText = "position:fixed;opacity:0;top:0;left:0";
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand("copy");
+  document.body.removeChild(ta);
+}
+
+/* ─── SEARCH INPUT ─────────────────────────────────────────────────── */
+document.getElementById("search").addEventListener("input", e => {
+  searchQuery = e.target.value;
+  renderTabs();
+  renderGrid();
+});
+
+/* ─── INIT ─────────────────────────────────────────────────────────── */
+renderTabs();
+renderGrid();
+</script>
+</body>
+</html>
